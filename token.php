@@ -22,7 +22,20 @@ if (is_restored_user($username)) {
 // Be very picky about who we let in
 $remote_addr = getremoteaddr();
 $clients = unserialize(get_config('local_ombieltoken', 'clients'));
-if (!is_array($clients) || !in_array($remote_addr, $clients)) {
+if (!is_array($clients)) {
+    throw new moodle_exception('accessdenied', 'admin');
+}
+
+$inlist = false;
+foreach($clients as $client) {
+    $client = trim($client);
+    if (address_in_subnet($remote_addr, $client)) {
+        $inlist = true;
+        break;
+    }
+}
+
+if (!$inlist) {
     throw new moodle_exception('accessdenied', 'admin');
 }
 
