@@ -5,7 +5,7 @@ define('NO_MOODLE_COOKIES', true);
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 
-$username = required_param('username', PARAM_USERNAME);
+$username = optional_param('username', PARAM_USERNAME, false);
 $serviceshortname  = required_param('service',  PARAM_ALPHANUMEXT);
 
 echo $OUTPUT->header();
@@ -179,8 +179,15 @@ function local_ombieltoken_authenticate_user($username) {
     global $CFG, $DB;
 
     $authsenabled = get_enabled_auth_plugins();
+    $authplugin = get_auth_plugin('cosign');
 
-    if ($user = get_complete_user_data('username', $username, $CFG->mnet_localhost_id)) {
+    if ($username) {
+      $user = get_complete_user_data('username', $username, $CFG->mnet_localhost_id);
+    } else {
+      $user = get_complete_user_data('username', auth_plugin_cosign::get_cosign_username(), $CFG->mnet_localhost_id);
+    }
+
+    if ($user) {
         if ($user->auth !== 'cosign') {
             // Invalid auth - we only allow cosign users in this token generator
             add_to_log(SITEID, 'login', 'error', 'index.php', $username);
@@ -199,7 +206,6 @@ function local_ombieltoken_authenticate_user($username) {
         return false;
     }
 
-    $authplugin = get_auth_plugin('cosign');
     $user = update_user_record($username);
 
     return $user;
