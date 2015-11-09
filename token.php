@@ -5,7 +5,7 @@ define('NO_MOODLE_COOKIES', true);
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 
-$username = optional_param('username', PARAM_USERNAME, false);
+$username = optional_param('username', null, PARAM_USERNAME);
 $serviceshortname  = required_param('service',  PARAM_ALPHANUMEXT);
 
 echo $OUTPUT->header();
